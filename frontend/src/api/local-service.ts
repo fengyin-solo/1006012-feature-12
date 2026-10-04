@@ -30,6 +30,14 @@ export function listEntries(key: string, filters: Record<string, string> = {}): 
 
 export function runAction(key: string, id: number, action: string): ActionResult {
   const meta = moduleMeta(key)
+  // 加油作业有独立的放行判定与台账入账逻辑（api/fuel-service），台账不允许手工动作；
+  // 通用流转不能改这两个模块，避免绕过油品匹配、接地全通过、状态链等校验。
+  if (key === 'fueling') {
+    return { ok: false, message: '加油作业必须走放行判定入口（开始加注/提交确认/确认完成），通用动作已禁用' }
+  }
+  if (key === 'fuelledger') {
+    return { ok: false, message: '油料需求台账只随加油作业完成自动入账，不能手工改动' }
+  }
   const target = meta.actionTargets[action]
   if (!target) {
     return { ok: false, message: `${meta.entity}没有登记「${action}」这个动作` }

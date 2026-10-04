@@ -8,6 +8,7 @@ const Shuttle = () => import('@/views/shuttle/index.vue')
 const Baggage = () => import('@/views/baggage/index.vue')
 const Line = () => import('@/views/line/index.vue')
 const Fueling = () => import('@/views/fueling/index.vue')
+const FuelLedger = () => import('@/views/fuelledger/index.vue')
 const Deice = () => import('@/views/deice/index.vue')
 const Gpu = () => import('@/views/gpu/index.vue')
 const Tow = () => import('@/views/tow/index.vue')
@@ -31,6 +32,7 @@ const router = createRouter({
     { path: '/baggage', name: 'baggage', component: Baggage },
     { path: '/line', name: 'line', component: Line },
     { path: '/fueling', name: 'fueling', component: Fueling },
+    { path: '/fuelledger', name: 'fuelledger', component: FuelLedger },
     { path: '/deice', name: 'deice', component: Deice },
     { path: '/gpu', name: 'gpu', component: Gpu },
     { path: '/tow', name: 'tow', component: Tow },
