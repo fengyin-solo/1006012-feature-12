@@ -2,7 +2,8 @@ import { SEED_ROWS } from './seed'
 import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
-const STORAGE_KEY = 'airport-ground-ops:entries'
+// 结构升级（如航油加注字段调整）时升版本号，旧缓存会自动回落到最新种子数据。
+const STORAGE_KEY = 'airport-ground-ops:entries:v2'
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T

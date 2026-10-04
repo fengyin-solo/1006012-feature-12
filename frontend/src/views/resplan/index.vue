@@ -67,6 +67,48 @@
       <span>共 {{ total }} 条保障资源调度记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
+
+    <section class="fuel-check">
+      <header class="fuel-check-head">
+        <div>
+          <h3>调度航油用量核对</h3>
+          <p class="page-desc">数据直接取自油料需求台账（由已完成加油作业派生），调度读到的用量与加油作业记录同源，不另立口径。</p>
+        </div>
+        <RouterLink class="btn" to="/fuel-ledger">打开油料需求台账</RouterLink>
+      </header>
+      <div class="stat-row">
+        <article class="stat-card">
+          <span class="stat-label">本月台账用量（{{ fuelUnit }}）</span>
+          <strong class="stat-value">{{ fuelStats.monthAmount }}</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">已计入作业</span>
+          <strong class="stat-value">{{ fuelStats.totalCompleted }}</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">超限留痕记录</span>
+          <strong class="stat-value">{{ fuelStats.forcedOverLimit }}</strong>
+        </article>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>作业编号</th><th>航班号</th><th>机型</th><th>实际加注量</th><th>作业日期</th><th>超限标记</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="entry in fuelEntries" :key="entry.作业编号">
+            <td>{{ entry.作业编号 }}</td>
+            <td>{{ entry.航班号 }}</td>
+            <td>{{ entry.机型 }}</td>
+            <td>{{ entry.实际加注量 }}</td>
+            <td>{{ entry.作业日期 }}</td>
+            <td :class="{ 'over-limit': entry.超限标记 !== '正常' }">{{ entry.超限标记 }}</td>
+          </tr>
+          <tr v-if="!fuelEntries.length">
+            <td colspan="6" class="empty-state">暂无已计入台账的加油作业</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </section>
 </template>
 
@@ -79,6 +121,8 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { fuelLedger, fuelingStats } from '@/domain/fueling/service'
+import { FUELING_RULE } from '@/domain/fueling/rules'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('resplan')
@@ -86,6 +130,11 @@ const columns = ["计划编号", "保障时段", "机位需求", "车辆需求",
 const actions = ["提交审核", "下发计划", "作废计划"]
 const statuses = ["待编制", "待审核", "已下发", "已作废"]
 const stats = [{"label": "待编制计划", "value": 0}, {"label": "已下发计划", "value": 0}, {"label": "存在缺口的计划", "value": 0}]
+
+// 调度线的航油用量与台账、作业记录共用同一份规则与派生数据。
+const fuelUnit = FUELING_RULE.unit
+const fuelEntries = computed(() => fuelLedger())
+const fuelStats = computed(() => fuelingStats())
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -135,3 +184,21 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.fuel-check {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.fuel-check-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.fuel-check-head h3 { margin: 0 0 4px; font-size: 15px; }
+.over-limit { color: #b54708; }
+</style>
